@@ -3,7 +3,7 @@
 select * from Application.People
 where 
 	People.IsSalesperson = 1 and 
-	EXISTS (select * from Sales.Invoices as I where People.PersonID=I.SalespersonPersonID);
+	NOT EXISTS (select * from Sales.Invoices as I where People.PersonID=I.SalespersonPersonID);
 
 --2. Выберите товары с минимальной ценой (подзапросом), 2 варианта подзапроса
 select * from Warehouse.StockItems where UnitPrice <= ALL(select UnitPrice from Warehouse.StockItems);
@@ -43,7 +43,10 @@ CustomersMaxAmount as
 select * from Sales.Customers where CustomerID in (select * from CustomersMaxAmount);
 
 --3.3
---?
+SELECT c.CustomerName, ct.TransactionAmount 
+FROM Sales.CustomerTransactions AS ct  
+JOIN Sales.Customers c ON c.CustomerID = ct.CustomerID 
+WHERE ct.TransactionAmount IN ( SELECT TOP 5 t.TransactionAmount FROM Sales.CustomerTransactions t ORDER BY TransactionAmount DESC);
 
 --4.Выберите города (ид и название), в которые были доставлены товары, входящие в тройку самых дорогих товаров, а также Имя сотрудника, который осуществлял упаковку заказов
 with 
