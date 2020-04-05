@@ -1,72 +1,75 @@
-create database project_otus;
+CREATE database ProjectOtus;
 
-create table cities
+CREATE TABLE cities
 (
-    id int identity(1,1) primary key,
-    city varchar(255)
+    id INT,
+    city NVARCHAR(50)
 );
 
-create table addresses
+CREATE TABLE addresses
 (
-    id int identity(1,1) primary key,
-    city_id int,
-    street varchar(255),
-    house int,
-    building varchar(15)
+    id INT PRIMARY KEY IDENTITY,
+    cityID INT,
+    street NVARCHAR(50),
+    house INT,
+    building NVARCHAR(15)
 );
-alter table addresses add constraint FK_addr_city foreign key (city_id) references cities(id);
+ALTER TABLE addresses ADD FOREIGN KEY (cityID) REFERENCES cities(id);
 
-create table flats
+CREATE TABLE flats
 (
-    id int identity(1,1) primary key,
-    addr_id int references addresses(id),
-    num int,
-    num_suffix varchar(7) default null
+    id INT PRIMARY KEY IDENTITY,
+    addrID INT REFERENCES addresses(id),
+    num INT,
+    num_suffix NVARCHAR(8) DEFAULT NULL
 );
 
-create table resources
+CREATE TABLE resources
 (
-    id int identity(1,1) primary key,
-    name varchar(255),
-    sensors_cycle int -- years
+    id INT PRIMARY KEY IDENTITY,
+    name NVARCHAR(30),
+    sensorsCycle INT -- years
 );
-alter table resources add constraint DF_res_cycle default(5) for sensors_cycle;
+ALTER TABLE resources ADD DEFAULT(5) for sensorsCycle;
 
-create table sensors
+CREATE TABLE sensors
 (
-    id int identity(1,1) primary key,
+    id INT PRIMARY KEY IDENTITY,
     num varchar(30),
-    res_id int references resources(id),
-    value int default 0,
-    date_prod date,
-    date_calibrate date
+    resourceID INT REFERENCES resources(id),
+    value INT DEFAULT 0,
+    dateProd DATE,
+    dateCalibrate DATE
 );
-alter table sensors add constraint CK_sensors_dates check (date_calibrate >= date_prod);
+ALTER TABLE sensors ADD CHECK (dateCalibrate >= dateProd);
 
 
 -- positions to install sensors
-create table sensors_positions
+CREATE TABLE sensorsPositions
 (
-    id int identity(1,1) primary key,
-    flat_id int references flats(id),
-    res_id int references resources(id),
-    location varchar(15)
+    id INT PRIMARY KEY IDENTITY,
+    flatID INT REFERENCES flats(id),
+    resourceID INT REFERENCES resources(id),
+    location NVARCHAR(30)
 );
 
-create table flat_sensors
+CREATE index idx_sp_flatID on sensorsPositions(flatID);
+
+CREATE TABLE flatSensors
 (
-    id int identity(1,1) primary key,
-    sensor_id int references sensors(id),
-    sens_pos_id int references sensors_positions(id),
-    date_start date,
-    date_stop date default null
+    id INT PRIMARY KEY IDENTITY,
+    sensorID INT REFERENCES sensors(id),
+    sensPosID INT REFERENCES sensorsPositions(id),
+    dateStart DATE,
+    dateStop DATE DEFAULT NULL
 );
 
-create table companies
+
+CREATE TABLE companies
 (
-    id int identity(1,1) primary key,
-    name varchar(255),
-    inn int
+    id INT PRIMARY KEY IDENTITY,
+    name NVARCHAR(50),
+    inn INT
 );
-alter table companies add constraint UQ_comp_inn UNIQUE (inn);
+ALTER TABLE companies ADD UNIQUE (inn);
 
